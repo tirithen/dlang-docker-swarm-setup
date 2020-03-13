@@ -1,0 +1,12 @@
+{
+	"authors": [
+		"Fredrik Söderström"
+	],
+	"description": "A minimal D application.",
+	"license": "GPLv3",
+	"name": "hellod",
+	"targetType": "executable",
+	"dependencies": {
+		"vibe-d": "0.8.6"
+	}
+}
