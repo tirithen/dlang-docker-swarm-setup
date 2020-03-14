@@ -15,6 +15,9 @@ To run this experiment you need to have `docker` and `docker-compose` packages i
     # Enabling docker swarm mode (if not already setup)
     docker swarm init
 
+    # Add network dlangtest_traefik-public (if not already setup)
+    docker network create dlangtest_traefik-public
+
     # Building the docker images
     docker-compose build
 
@@ -22,16 +25,16 @@ To run this experiment you need to have `docker` and `docker-compose` packages i
     docker stack deploy -c docker-compose.yml dlangtest
 
     # Testing the services (ensure that you have docker.localhost setup see below)
-    curl -i docker.localhost/api/hellojs
-    curl -i docker.localhost/api/hellod
-    curl -i docker.localhost/api/hellodalpine
-    curl -i docker.localhost/api/hellod-working-why
+    curl -i docker.localhost/api/hellojs/
+    curl -i docker.localhost/api/hellod/
+    curl -i docker.localhost/api/hellodalpine/
+    curl -i docker.localhost/api/hellod-working-why/
 
 ## Setup docker.localhost
 
 Check the IP address assigned to the docker_gwbridge interface:
 
-    $ ip addr | grep "global docker0"  
+    $ ip addr | grep "global docker0"
 
 Add that entry to your /etc/hosts file (in my case 172.17.0.1):
 

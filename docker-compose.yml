@@ -1,6 +1,13 @@
 version: '3.7'
 
 
+networks:
+
+    traefik-public:
+        driver: overlay
+        external:
+          name: dlangtest_traefik-public
+
 services:
 
     traefik:
@@ -9,8 +16,10 @@ services:
             - "--log.level=DEBUG"
             - "--api.debug=true"
             - "--api.insecure=true"
+            # - "--providers.docker.network=dlangtest_traefik-public"
             - "--providers.docker=true"
-            - "--providers.docker.exposedbydefault=false"
+            # - "--providers.docker.swarmmode=true"
+            - "--providers.docker.exposedByDefault=false"
             - "--entrypoints.web.address=:80"
         networks:
             - traefik-public
@@ -20,6 +29,7 @@ services:
         volumes:
             - "/var/run/docker.sock:/var/run/docker.sock:ro"
         deploy:
+            replicas: 3
             placement:
                 constraints:
                     - node.role == manager
@@ -31,9 +41,17 @@ services:
         image: plant-recipescom_hellod
         labels:
             - "traefik.enable=true"
-            - "traefik.http.routers.hellod.rule=PathPrefix(`/api/hellod`)"
+            - "traefik.http.services.hellod.loadbalancer.server.port=8080"
+            - "traefik.http.middlewares.stripprefix.stripprefixregex.regex=/api/[^/]+"
+            - "traefik.http.middlewares.compress.compress=true"
+            - "traefik.http.routers.hellod.middlewares=stripprefix@docker,compress@docker"
+            - "traefik.http.routers.hellod.rule=PathPrefix(`/api/hellod/`)"
+            - "traefik.http.routers.hellod.entrypoints=web"
+            - "traefik.docker.lbswarm=true"
         networks:
             - traefik-public
+        deploy:
+            replicas: 3
 
     hellodalpine:
         build:
@@ -42,30 +60,49 @@ services:
         image: plant-recipescom_hellodalpine
         labels:
             - "traefik.enable=true"
-            - "traefik.http.routers.hellodalpine.rule=PathPrefix(`/api/hellodalpine`)"
+            - "traefik.http.services.hellodalpine.loadbalancer.server.port=8080"
+            - "traefik.http.middlewares.stripprefix.stripprefixregex.regex=/api/[^/]+"
+            - "traefik.http.middlewares.compress.compress=true"
+            - "traefik.http.routers.hellodalpine.middlewares=stripprefix@docker,compress@docker"
+            - "traefik.http.routers.hellodalpine.rule=PathPrefix(`/api/hellodalpine/`)"
+            - "traefik.http.routers.hellodalpine.entrypoints=web"
+            - "traefik.docker.lbswarm=true"
         networks:
             - traefik-public
+        deploy:
+            replicas: 3
 
     hellojs:
         build:
             dockerfile: ./hellojs/Dockerfile
             context: .
-        image: plant-recipescom_hellod
+        image: plant-recipescom_hellojs
         labels:
             - "traefik.enable=true"
-            - "traefik.http.routers.hellojs.rule=PathPrefix(`/api/hellojs`)"
+            - "traefik.http.services.hellojs.loadbalancer.server.port=8080"
+            - "traefik.http.middlewares.stripprefix.stripprefixregex.regex=/api/[^/]+"
+            - "traefik.http.middlewares.compress.compress=true"
+            - "traefik.http.routers.hellojs.middlewares=stripprefix@docker,compress@docker"
+            - "traefik.http.routers.hellojs.rule=PathPrefix(`/api/hellojs/`)"
+            - "traefik.http.routers.hellojs.entrypoints=web"
+            - "traefik.docker.lbswarm=true"
         networks:
             - traefik-public
+        deploy:
+            replicas: 3
 
     hellod-working-why:
         image: tam4s/hello-vibe-x86_64
         labels:
             - "traefik.enable=true"
-            - "traefik.http.routers.hellod-working-why.rule=PathPrefix(`/api/hellod-working-why`)"
+            - "traefik.http.services.hellodworkingwhy.loadbalancer.server.port=8080"
+            - "traefik.http.middlewares.stripprefix.stripprefixregex.regex=/api/[^/]+"
+            - "traefik.http.middlewares.compress.compress=true"
+            - "traefik.http.routers.hellodworkingwhy.middlewares=stripprefix@docker,compress@docker"
+            - "traefik.http.routers.hellodworkingwhy.rule=PathPrefix(`/api/hello-d-working-why/`)"
+            - "traefik.http.routers.hellodworkingwhy.entrypoints=web"
+            - "traefik.docker.lbswarm=true"
         networks:
             - traefik-public
-
-networks:
-
-    traefik-public:
-        driver: overlay
+        deploy:
+            replicas: 3
